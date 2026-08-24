@@ -15,10 +15,23 @@ describe('createMoodEntry', () => {
   });
 
   it('derives the day from a backfilled timestamp instead of "now"', () => {
-    // Midday avoids the day flipping under the runner's local timezone.
     const entry = createMoodEntry({ mood: 3, recordedAt: '2026-08-20T12:00:00Z' }, context);
 
     expect(entry.day).toBe('2026-08-20');
+  });
+
+  it('resolves a bare date backfill to that local calendar day regardless of the machine timezone', () => {
+    // A date-only value has no time-of-day to preserve, so it must land on
+    // exactly this day everywhere — not shift by one under UTC parsing.
+    const entry = createMoodEntry({ mood: 3, recordedAt: '2026-08-20' }, context);
+
+    expect(entry.day).toBe('2026-08-20');
+  });
+
+  it('rejects a bare date that is not a real calendar day', () => {
+    expect(() => createMoodEntry({ mood: 3, recordedAt: '2026-02-30' }, context)).toThrow(
+      ValidationError
+    );
   });
 
   it('keeps optional fields off the entry when they were not supplied', () => {
@@ -44,6 +57,12 @@ describe('createMoodEntry', () => {
     const entry = createMoodEntry({ mood: 5, note: '   ' }, context);
 
     expect(entry).not.toHaveProperty('note');
+  });
+
+  it('treats a null energy/stress the same as an omitted one', () => {
+    const entry = createMoodEntry({ mood: 4, energy: null as unknown as number }, context);
+
+    expect(entry).not.toHaveProperty('energy');
   });
 
   it.each([0, 6, 2.5, '4'])('rejects %o as a mood value', (mood) => {
