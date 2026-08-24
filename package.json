@@ -5,17 +5,22 @@
   "main": "dist/main/main.js",
   "private": true,
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "npm run build:main && npm run build:preload",
+    "build:main": "tsc -p tsconfig.json",
+    "build:preload": "esbuild src/main/preload.ts --bundle --platform=node --format=cjs --target=node20 --external:electron --outfile=dist/main/preload.js",
     "start": "npm run build && electron .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.test.json"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "electron": "^33.4.11",
+    "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
   "allowScripts": {
-    "electron@33.4.11": true
+    "electron@33.4.11": true,
+    "esbuild@0.28.2": true
   }
 }
