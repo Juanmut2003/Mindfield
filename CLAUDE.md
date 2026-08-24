@@ -30,18 +30,16 @@ Because this handles mental-health data, treat these as non-functional requireme
 
 ## Current state
 
-- **UI**: first dashboard screen (`Homescreen.dc.html`) imported from a Claude Design project via the DesignSync MCP tool. `support.js` is a generated dc-runtime bundle (React-based template engine) — do not hand-edit it; re-fetch from the Claude Design project instead if it needs to change.
-- **Platform**: Electron desktop app, not a website. `main.js` opens a native BrowserWindow and loads `Homescreen.dc.html`.
+- **UI**: first dashboard screen (`src/renderer/Homescreen.dc.html`) imported from a Claude Design project via the DesignSync MCP tool. `src/renderer/support.js` is a generated dc-runtime bundle (React-based template engine) — do not hand-edit it; re-fetch from the Claude Design project instead if it needs to change.
+- **Platform**: Electron desktop app, not a website. `src/main/main.ts` opens a native BrowserWindow (via `src/main/window-config.ts`) and loads `src/renderer/Homescreen.dc.html`.
 - **Business logic**: not yet implemented (tracking, journal, AI assistant, psychiatrist referral are future phases, not started).
 - Git remote `origin` → `https://github.com/Juanmut2003/Mindfield.git`, default branch `main`.
 
 ## Development conventions
 
-These are the target conventions for the project going forward. The current scaffold (`main.js`, flat root layout) predates them and hasn't been migrated yet — don't assume it already follows these until it's been explicitly updated.
-
-- **Language**: TypeScript for all app code (main process and renderer logic).
-- **Testing**: introduce a test framework (e.g. Vitest) as soon as real logic exists — not purely for UI, but definitely once there's tracking calculations, pattern-matching, or anomaly detection, given how much trust depends on those being correct.
-- **Structure**: organize into `src/main` (Electron main process) and `src/renderer` (UI) as the codebase grows, rather than everything flat in the repo root.
+- **Language**: TypeScript for all app code. The Electron main process lives in `src/main/*.ts`, compiled by `tsc` (see `tsconfig.json`) to `dist/main/*.js`; `package.json`'s `main` points at the compiled output. `npm start` builds then launches; `npm run build` just builds.
+- **Testing**: Vitest is set up (`npm test`, config in `vitest.config.mts`). Keep pure logic (no Electron runtime import) in its own module so it's testable without a real Electron process — see `window-config.ts` + `window-config.test.ts` for the pattern: files that only need Electron's *types* should `import type` from `'electron'`, not a runtime import, so Vitest can load them standalone.
+- **Structure**: `src/main` (Electron main process, compiled) and `src/renderer` (UI, currently plain HTML/JS — not run through the TS build).
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, etc.).
 
 ## Workflow rule
