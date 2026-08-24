@@ -1,0 +1,16 @@
+{
+  "name": "mindfield",
+  "version": "1.0.0",
+  "description": "Mindfield desktop app",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}
