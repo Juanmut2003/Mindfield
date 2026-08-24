@@ -45,6 +45,7 @@ What this project is actually built with — read this first if you're a new Cla
 
 - **Desktop shell**: Electron. Not a website — always keep the native-app framing (own window, no browser chrome) in mind for anything UI-related.
 - **Main process language**: TypeScript, compiled with `tsc`.
+- **Preload bundling**: `src/main/preload.ts` is bundled to a single file with **esbuild** (`npm run build:preload`), because the renderer runs sandboxed and a sandboxed preload cannot `require()` relative files — a multi-file preload fails *silently* (no `window.mindfield`, only a `preload-error` event). `tsc` still type-checks the preload; esbuild just overwrites its output. This is the only reason esbuild is a dependency.
 - **UI / renderer**: a single `.dc.html` "canvas" (`src/renderer/Homescreen.dc.html`) authored in **Claude Design** and imported via the **DesignSync MCP tool**. It's rendered client-side by `src/renderer/support.js`, a generated dc-runtime bundle (a small React-based template engine using `{{ }}` bindings, `sc-for`/`sc-if` custom elements). **Never hand-edit `support.js`** — it's generated; re-fetch it from the Claude Design project (project id `6636a48c-0b64-48f4-82ca-0e9779327888`) if it needs to change. Visual/layout changes to the UI should go through Claude Design, not ad-hoc HTML edits, where possible.
 - **Testing**: Vitest.
 - **Version control**: GitHub repo `Juanmut2003/Mindfield`. Work happens on feature/chore branches with Pull Requests — not committed straight to `main`. The `gh` CLI is installed and authenticated on the dev machine, so PRs can be created directly from the terminal.
@@ -54,7 +55,8 @@ What this project is actually built with — read this first if you're a new Cla
 
 - **UI**: first dashboard screen (`src/renderer/Homescreen.dc.html`) imported from a Claude Design project via the DesignSync MCP tool. `src/renderer/support.js` is a generated dc-runtime bundle (React-based template engine) — do not hand-edit it; re-fetch from the Claude Design project instead if it needs to change.
 - **Platform**: Electron desktop app, not a website. `src/main/main.ts` opens a native BrowserWindow (via `src/main/window-config.ts`) and loads `src/renderer/Homescreen.dc.html`.
-- **Business logic**: not yet implemented (tracking, journal, AI assistant, psychiatrist referral are future phases, not started). None of the planned screens above (Aktivitäten, Kalender, KI-Assistent, Kontakte) exist yet beyond the dashboard shell.
+- **Mental-health data layer** (`src/main/mental-health/`, issue #7): mood entries, journal entries and self-check questionnaires — domain types, validation, scoring, and a `MentalHealthStore` over a narrow `MentalHealthStorage` seam (JSON file on disk, in-memory in tests). Reachable from the renderer as `window.mindfield.mentalHealth` via `src/main/preload.ts`. See the section below for how it is meant to be used.
+- **Business logic**: apart from the mental-health data layer, not yet implemented (fitness tracking, AI assistant, psychiatrist referral are future phases, not started). None of the planned screens above (Aktivitäten, Kalender, KI-Assistent, Kontakte) exist yet beyond the dashboard shell — the dashboard still renders hard-coded sample data and is **not** wired to the store.
 - Git remote `origin` → `https://github.com/Juanmut2003/Mindfield.git`, default branch `main`.
 
 ## Development conventions
@@ -63,6 +65,18 @@ What this project is actually built with — read this first if you're a new Cla
 - **Testing**: Vitest is set up (`npm test`, config in `vitest.config.mts`). Keep pure logic (no Electron runtime import) in its own module so it's testable without a real Electron process — see `window-config.ts` + `window-config.test.ts` for the pattern: files that only need Electron's *types* should `import type` from `'electron'`, not a runtime import, so Vitest can load them standalone.
 - **Structure**: `src/main` (Electron main process, compiled) and `src/renderer` (UI, currently plain HTML/JS — not run through the TS build).
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, etc.).
+- **Type-checking tests**: `tsconfig.json` excludes `*.test.ts` from the build, so Vitest (transpile-only) would not catch type errors in tests. `npm run typecheck` (`tsconfig.test.json`) checks *everything* including tests — run it alongside `npm test`.
+
+## Mental-health data layer
+
+`src/main/mental-health/` is the reference for how domain code in this project should look — copy the shape when building the fitness/activity layer.
+
+- **Layering**: `types.ts` (data shapes) → `validation.ts` (input rules) → `mood.ts` / `journal.ts` / `self-check.ts` (pure functions over one concept) → `store.ts` (the only stateful thing) → `ipc.ts` + `preload.ts` (transport). Nothing below `ipc.ts` imports Electron at runtime, so it all unit-tests without an Electron process.
+- **Injected clock and ids**: `MentalHealthStore.open({ now, createId })` — tests pass fixed values instead of mocking globals.
+- **Persistence seam**: `MentalHealthStorage` is deliberately just `read()` / `write(snapshot)`. Encryption at rest (issue #9) should arrive as a new implementation of that interface, not as changes to the store. `MENTAL_HEALTH_SCHEMA_VERSION` guards against reading data from a newer app version.
+- **IPC never rejects**: every handler answers with an `IpcResult<T>` envelope (`{ ok: true, value }` or `{ ok: false, error: { code, field, message } }`) so the UI can show a specific German message for the field the user got wrong. Error messages in the code stay English; translation is the UI's job.
+- **Self-checks ship no questionnaire.** The structure exists, but choosing a validated clinical instrument (and licensing it) is a clinical decision — do not invent one and present it as a real assessment.
+- **Sandbox constraint**: if you add anything to the preload, remember it must stay bundlable and must not assume Node APIs — see "Preload bundling" above. After touching the preload, verify `window.mindfield` actually exists in the running app; a broken preload fails silently.
 
 ## Workflow rule
 

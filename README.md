@@ -48,7 +48,9 @@ Aktuell ein Ein-Personen-Projekt. Ziel ist, es professionell und wartbar auszuba
 - **Plattform**: Electron-Desktop-App (kein Web-Deployment).
 - **Sprache**: TypeScript für den Electron-Main-Prozess (`src/main`); die UI (`src/renderer`) ist aktuell ein aus Claude Design importiertes `.dc.html`-Canvas.
 - **Tests**: Vitest.
-- **Fachlogik**: Noch nicht implementiert – aktuell existiert das UI-Grundgerüst (Dashboard-Design), aber weder echte Daten noch die oben beschriebenen Einzelbereiche (Aktivitäten, Kalender, KI-Assistent, Kontakte) sind bereits gebaut.
+- **Fachlogik**: Der Daten-Layer für das Mental-Health-Tracking (Mood-Einträge, Journal, Selbst-Checks) ist implementiert – inklusive lokaler Speicherung und einer abgesicherten Brücke zur UI. Die zugehörigen Bildschirme fehlen noch: das UI-Grundgerüst zeigt weiterhin nur das Dashboard-Design mit Beispieldaten, die Bereiche Aktivitäten, Kalender, KI-Assistent und Kontakte sind noch nicht gebaut.
+- **Speicherung**: Mental-Health-Daten liegen ausschließlich lokal auf dem Rechner des Nutzers (eine JSON-Datei im persönlichen App-Datenordner, nur für den eigenen Benutzer lesbar). Es werden keine Daten an einen Server gesendet. Eine Verschlüsselung dieser Datei ist vorgesehen, aber noch nicht umgesetzt.
+- **Selbst-Checks**: Die Struktur für Fragebögen steht, es ist aber bewusst noch kein konkreter (klinisch validierter) Fragebogen hinterlegt – dessen Auswahl ist eine fachliche, keine technische Entscheidung.
 
 Mehr technische Details, Konventionen und Kontext für die Entwicklung stehen in [`CLAUDE.md`](CLAUDE.md).
 

@@ -1,6 +1,10 @@
 import type { BrowserWindowConstructorOptions } from 'electron';
 
-export function createWindowOptions(): BrowserWindowConstructorOptions {
+/**
+ * @param preloadPath absolute path to the compiled preload script that exposes
+ *   `window.mindfield` to the renderer.
+ */
+export function createWindowOptions(preloadPath: string): BrowserWindowConstructorOptions {
   return {
     width: 1360,
     height: 860,
@@ -10,8 +14,10 @@ export function createWindowOptions(): BrowserWindowConstructorOptions {
     backgroundColor: '#fbfcfe',
     autoHideMenuBar: true,
     webPreferences: {
+      preload: preloadPath,
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      sandbox: true
     }
   };
 }
