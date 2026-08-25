@@ -83,6 +83,13 @@ describe('JsonFileStorage', () => {
     expect(await new JsonFileStorage(flat).read()).toEqual(emptySnapshot());
   });
 
+  it('fails loudly when a present collection has the wrong type, instead of dropping it', async () => {
+    const flat = path.join(directory, 'mental-health.json');
+    await writeFile(flat, JSON.stringify({ ...emptySnapshot(), moodEntries: null }), 'utf8');
+
+    await expect(new JsonFileStorage(flat).read()).rejects.toThrow(/moodEntries.*not a list/);
+  });
+
   it('refuses data written by a newer schema version', async () => {
     const flat = path.join(directory, 'mental-health.json');
     await writeFile(

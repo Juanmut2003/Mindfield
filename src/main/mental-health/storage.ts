@@ -41,7 +41,9 @@ export class InMemoryStorage implements MentalHealthStorage {
  *
  * A corrupt or hand-edited file must not crash the app on startup, and it must
  * not silently discard data either: unknown future schema versions are
- * rejected loudly, while missing collections just default to empty.
+ * rejected loudly, a missing collection just defaults to empty (an older or
+ * partially hand-edited file), but a collection that IS present with the
+ * wrong type is corruption, not absence, and is rejected loudly too.
  */
 export function normaliseSnapshot(value: unknown): MentalHealthSnapshot {
   if (value === null || typeof value !== 'object') return emptySnapshot();
@@ -58,8 +60,16 @@ export function normaliseSnapshot(value: unknown): MentalHealthSnapshot {
 
   return {
     schemaVersion: MENTAL_HEALTH_SCHEMA_VERSION,
-    moodEntries: Array.isArray(raw.moodEntries) ? raw.moodEntries : [],
-    journalEntries: Array.isArray(raw.journalEntries) ? raw.journalEntries : [],
-    selfCheckResponses: Array.isArray(raw.selfCheckResponses) ? raw.selfCheckResponses : []
+    moodEntries: normaliseCollection(raw.moodEntries, 'moodEntries'),
+    journalEntries: normaliseCollection(raw.journalEntries, 'journalEntries'),
+    selfCheckResponses: normaliseCollection(raw.selfCheckResponses, 'selfCheckResponses')
   };
+}
+
+function normaliseCollection<T>(value: T[] | undefined, field: string): T[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    throw new Error(`Mental-health data is corrupt: "${field}" is not a list.`);
+  }
+  return value;
 }

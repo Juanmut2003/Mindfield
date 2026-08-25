@@ -31,9 +31,24 @@ export function assertDayKey(value: string, field: string): DayKey {
 /**
  * Resolves an optional caller-supplied ISO timestamp against the store clock.
  * Returns the parsed Date so callers can derive the day key from the same value.
+ *
+ * A bare `YYYY-MM-DD` value is treated as that LOCAL calendar date, not UTC
+ * midnight: `new Date('2026-08-20')` parses as `2026-08-20T00:00:00Z`, which
+ * `toDayKey`'s local-time getters then read back as `2026-08-19` in any
+ * timezone behind UTC. Since a date-only backfill carries no time-of-day to
+ * preserve, resolving it directly as a local date sidesteps that round-trip.
  */
 export function resolveTimestamp(value: string | undefined, now: Date, field: string): Date {
   if (value === undefined) return now;
+
+  if (DAY_PATTERN.test(value)) {
+    const [year, month, day] = value.split('-').map(Number) as [number, number, number];
+    const parsed = new Date(year, month - 1, day);
+    if (toDayKey(parsed) !== value) {
+      throw new ValidationError(field, `${field} must be a valid calendar date`);
+    }
+    return parsed;
+  }
 
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -64,7 +79,7 @@ export function assertOptionalRating(
   min?: number,
   max?: number
 ): number | undefined {
-  return value === undefined ? undefined : assertRating(value, field, min, max);
+  return value === undefined || value === null ? undefined : assertRating(value, field, min, max);
 }
 
 /**
