@@ -9,12 +9,52 @@
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 <style>
   body { margin: 0; background: #fbfcfe; font-family: 'Inter Tight', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
   a { color: oklch(0.62 0.09 240); text-decoration: none; }
   a:hover { color: oklch(0.5 0.1 240); }
   * { box-sizing: border-box; }
+  .mood-orb, .mood-orb-inner { transform-box: fill-box; transform-origin: 50% 50%; }
+  .mood-orb { animation: moodPulse 6s ease-in-out infinite; }
+  .mood-orb-inner { animation: moodDrift 8s ease-in-out infinite; }
+  @keyframes moodPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.14); opacity: 1; }
+  }
+  @keyframes moodDrift {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(10deg) scale(1.06); }
+  }
+
+  /* The journal writing surface: a page, not a form field. No box — the text
+     itself is the interface, so the serif and the margin rule carry the look. */
+  .journal-write {
+    width: 100%; border: none; outline: none; background: transparent; resize: vertical;
+    min-height: 300px; padding: 0; display: block;
+    font-family: 'Newsreader', Georgia, serif; font-size: 17.5px; line-height: 1.75;
+    color: oklch(0.3 0.02 250);
+  }
+  .journal-write::placeholder { font-style: italic; color: oklch(0.74 0.02 245); }
+
+  /* Mood slider, themed per placement through custom properties so the dark
+     dashboard card and the light journal margin share one control. */
+  .mood-range {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer; margin: 0;
+  }
+  .mood-range:focus { outline: none; }
+  .mood-range::-webkit-slider-runnable-track {
+    height: 3px; border-radius: 2px; background: var(--mood-track);
+  }
+  .mood-range::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6.5px;
+    border-radius: 50%; background: var(--mood-thumb);
+    border: 1.5px solid var(--mood-thumb-ring);
+    box-shadow: 0 1px 5px oklch(0.35 0.05 250 / 0.3);
+    transition: transform 120ms ease;
+  }
+  .mood-range:active::-webkit-slider-thumb { transform: scale(1.15); }
 </style>
 </helmet>
 <div style="display: flex; min-height: 100vh; background: #fbfcfe; color: oklch(0.32 0.02 250)">
@@ -35,7 +75,7 @@
     </div>
 
     <nav style="display: flex; flex-direction: column; gap: 3px">
-      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="4">
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">
         <button onClick="{{ item.select }}" style="{{ item.style }}" style-hover="background: oklch(0.945 0.022 240)">
           <span style="width: 18px; height: 18px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center">{{ item.icon }}</span>
           <span style="white-space: nowrap; overflow: hidden; opacity: {{ labelOpacity }}; transition: opacity 160ms">{{ item.label }}</span>
@@ -103,16 +143,60 @@
   <main style="flex: 1; min-width: 0; display: flex; flex-direction: column">
     <header style="display: flex; align-items: baseline; gap: 12px; padding: 30px 40px 0">
       <h1 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">{{ activeLabel }}</h1>
-      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.7 0.02 245)">Montag, 18. August</span>
-      <div style="margin-left: auto; display: flex; gap: 4px; background: oklch(0.965 0.014 240); border: 1px solid oklch(0.93 0.015 240); border-radius: 10px; padding: 3px">
-        <sc-for list="{{ tabs }}" as="r" hint-placeholder-count="3">
-          <button onClick="{{ r.select }}" style="{{ r.style }}">{{ r.label }}</button>
-        </sc-for>
-      </div>
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.7 0.02 245)">Montag, 18. August</span>
+      </sc-if>
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-left: auto; display: flex; gap: 4px; background: oklch(0.965 0.014 240); border: 1px solid oklch(0.93 0.015 240); border-radius: 10px; padding: 3px">
+          <sc-for list="{{ tabs }}" as="r" hint-placeholder-count="3">
+            <button onClick="{{ r.select }}" style="{{ r.style }}">{{ r.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
     </header>
 
     <sc-if value="{{ showDashboard }}" hint-placeholder-val="{{ true }}">
     <div style="padding: 26px 40px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1180px; width: 100%">
+
+      <div style="{{ moodHeroStyle }}">
+        <svg width="150" height="150" viewBox="0 0 150 150" style="position: absolute; top: -20px; right: -10px; overflow: visible">
+          <defs>
+            <filter id="moodGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="16"></feGaussianBlur>
+            </filter>
+          </defs>
+          <circle class="mood-orb" cx="75" cy="75" r="42" fill="{{ moodOrbColor }}" filter="url(#moodGlow)"></circle>
+          <circle class="mood-orb-inner" cx="75" cy="75" r="24" fill="{{ moodOrbColor }}" opacity="0.9"></circle>
+        </svg>
+        <div onClick="{{ toggleMoodExpanded }}" style="position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; cursor: pointer">
+          <div style="max-width: 70%">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.9 0.02 250 / 0.65)">Tägliche Stimmung</div>
+            <div style="font-size: 21px; font-weight: 600; color: #fff; margin-top: 10px; letter-spacing: -0.01em">{{ moodHeroTitle }}</div>
+            <div style="font-size: 12px; color: oklch(0.9 0.02 250 / 0.7); margin-top: 5px">{{ moodHeroSubtitle }}</div>
+          </div>
+          <span style="{{ moodChevronStyle }}">⌄</span>
+        </div>
+
+        <div style="{{ moodExpandWrapStyle }}">
+          <div style="overflow: hidden; min-height: 0">
+            <div style="position: relative; z-index: 1; padding-top: 22px">
+              <div style="font-size: 12.5px; color: oklch(0.95 0.02 250 / 0.8); margin-bottom: 6px">{{ moodSliderLabelText }}</div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; max-width: 420px">
+                <span style="font-size: 20px; line-height: 1">😞</span>
+                <input class="mood-range" type="range" min="1" max="5" step="1" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.85)); --mood-thumb: #fff; --mood-thumb-ring: rgba(255,255,255,0.55)" />
+                <span style="font-size: 20px; line-height: 1">😄</span>
+              </div>
+              <input type="text" placeholder="Kurze Notiz (optional)" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; max-width: 420px; box-sizing: border-box; border: none; border-bottom: 1px solid rgba(255,255,255,0.28); background: transparent; color: #fff; padding: 7px 2px; font-family: inherit; font-size: 13px; margin-bottom: 16px; outline: none" />
+              <div style="display: flex; align-items: center; gap: 10px">
+                <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSubmitStyle }}">Eintragen</button>
+                <sc-if value="{{ moodError }}" hint-placeholder-val="{{ '' }}">
+                  <span style="font-size: 11.5px; color: oklch(0.8 0.15 30)">{{ moodError }}</span>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px">
         <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
@@ -371,6 +455,96 @@
       </div>
     </div>
     </sc-if>
+
+    <sc-if value="{{ showJournal }}" hint-placeholder-val="{{ false }}">
+    <div style="padding: 20px 44px 64px; display: grid; grid-template-columns: minmax(0,1fr) 258px; gap: 44px; max-width: 1140px; width: 100%; align-items: start">
+
+      <div style="padding-left: 30px; border-left: 1px solid oklch(0.9 0.028 45)">
+
+        <div style="display: flex; align-items: flex-end; gap: 13px; margin-bottom: 26px">
+          <span style="font-family: 'Newsreader', Georgia, serif; font-size: 52px; line-height: 0.82; color: oklch(0.34 0.03 250)">{{ todayDayNumber }}</span>
+          <div style="padding-bottom: 3px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.52 0.03 248)">{{ todayWeekday }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.74 0.02 245); margin-top: 3px">{{ todayMonthYear }}</div>
+          </div>
+          <span style="margin-left: auto; padding-bottom: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(0.76 0.02 245)">{{ journalWordCount }}</span>
+        </div>
+
+        <textarea class="journal-write" placeholder="Schreib los — was war heute los, was geht dir nach?" value="{{ journalDraft }}" onInput="{{ onJournalInput }}" onKeyDown="{{ onJournalKeyDown }}"></textarea>
+
+        <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px; padding-top: 16px; border-top: 1px solid oklch(0.94 0.012 245)">
+          <button onClick="{{ submitJournal }}" disabled="{{ journalSubmitDisabled }}" style="{{ journalSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintrag sichern</button>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(0.78 0.02 245)">{{ saveShortcutHint }}</span>
+          <sc-if value="{{ journalError }}" hint-placeholder-val="{{ '' }}">
+            <span style="font-size: 11.5px; color: oklch(0.58 0.14 25)">{{ journalError }}</span>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ hasJournalEntries }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top: 46px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.74 0.02 245); margin-bottom: 4px">Frühere Einträge</div>
+          <sc-for list="{{ recentJournalEntries }}" as="j" hint-placeholder-count="3">
+            <div style="padding: 20px 0 22px; border-top: 1px solid oklch(0.94 0.012 245)">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.62 0.04 248); margin-bottom: 9px">{{ j.stamp }}</div>
+              <div style="font-family: 'Newsreader', Georgia, serif; font-size: 16px; line-height: 1.7; color: oklch(0.38 0.02 250); white-space: pre-wrap">{{ j.snippet }}</div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+      </div>
+
+      <aside style="position: sticky; top: 24px">
+
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.74 0.02 245)">Stimmung jetzt</div>
+        <div style="font-family: 'Newsreader', Georgia, serif; font-size: 25px; color: oklch(0.34 0.03 250); margin: 7px 0 14px">{{ moodSliderLabelText }}</div>
+
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="font-size: 17px; line-height: 1">😞</span>
+          <input class="mood-range" type="range" min="1" max="5" step="1" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, oklch(0.52 0.1 268), oklch(0.7 0.04 240), oklch(0.8 0.11 68)); --mood-thumb: #fff; --mood-thumb-ring: {{ moodCurrentColor }}" />
+          <span style="font-size: 17px; line-height: 1">😄</span>
+        </div>
+
+        <input type="text" placeholder="Notiz (optional)" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; box-sizing: border-box; border: none; border-bottom: 1px solid oklch(0.9 0.015 245); background: transparent; padding: 8px 2px; font-family: inherit; font-size: 12.5px; color: oklch(0.34 0.02 250); outline: none; margin: 14px 0 14px" />
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+          <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintragen</button>
+          <sc-if value="{{ moodError }}" hint-placeholder-val="{{ '' }}">
+            <span style="font-size: 11px; color: oklch(0.58 0.14 25)">{{ moodError }}</span>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ hasTodayMoods }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{ todayMoods }}" as="e" hint-placeholder-count="2">
+            <div style="display: flex; align-items: baseline; gap: 9px">
+              <span style="width: 5px; height: 5px; flex: 0 0 auto; border-radius: 50%; background: {{ e.color }}; transform: translateY(-2px)"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(0.7 0.02 245); flex: 0 0 auto">{{ e.time }}</span>
+              <span style="font-size: 12px; color: oklch(0.5 0.02 245); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ e.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <div style="margin-top: 34px; padding-top: 18px; border-top: 1px solid oklch(0.94 0.012 245)">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.74 0.02 245); margin-bottom: 10px">Verlauf · 14 Tage</div>
+          <svg viewBox="0 0 240 306" width="100%" style="display: block; overflow: visible">
+            <text x="62" y="12" text-anchor="start" font-family="'IBM Plex Mono', monospace" font-size="8.5" letter-spacing="0.08em" fill="oklch(0.8 0.02 245)">TIEF</text>
+            <text x="222" y="12" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="8.5" letter-spacing="0.08em" fill="oklch(0.8 0.02 245)">HOCH</text>
+            <sc-for list="{{ spineGuides }}" as="g" hint-placeholder-count="3">
+              <line x1="{{ g.x }}" y1="22" x2="{{ g.x }}" y2="298" stroke="oklch(0.95 0.01 245)" stroke-width="1"></line>
+            </sc-for>
+            <path d="{{ spinePath }}" fill="none" stroke="oklch(0.84 0.03 245)" stroke-width="1.6" stroke-linecap="round"></path>
+            <sc-for list="{{ spineNodes }}" as="n" hint-placeholder-count="14">
+              <g>
+                <text x="0" y="{{ n.labelY }}" font-family="'IBM Plex Mono', monospace" font-size="9" fill="{{ n.labelColor }}">{{ n.label }}</text>
+                <circle cx="{{ n.x }}" cy="{{ n.y }}" r="{{ n.r }}" fill="{{ n.fill }}" stroke="{{ n.stroke }}" stroke-width="{{ n.strokeWidth }}"></circle>
+              </g>
+            </sc-for>
+          </svg>
+        </div>
+      </aside>
+    </div>
+    </sc-if>
   </main>
 </div>
 
@@ -380,11 +554,270 @@ const ICONS = {
   home: 'M2 7.2 9 2l7 5.2V15a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z',
   activity: 'M1.5 9h3.2l2-4.6 2.6 9L11.4 9h3.1',
   plan: 'M3 3.5h12v11H3zM3 7h12M7 3.5v11',
+  journal: 'M4 2.5h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1zM6 6h5M6 9h5M6 12h3',
   assistant: 'M9 2.2 10.4 6l3.8 1.4-3.8 1.4L9 12.6 7.6 8.8 3.8 7.4 7.6 6zM14 11.6l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z'
 };
 
+const MOOD_LABEL = { 1: 'Sehr schlecht', 2: 'Schlecht', 3: 'Okay', 4: 'Gut', 5: 'Sehr gut' };
+const MOOD_ORB_COLOR = 'oklch(0.78 0.09 235)';
+
+/* Cool-to-warm rather than red-to-green: a temperature reading of the day,
+   not a pass/fail verdict on it. */
+const MOOD_COLOR = {
+  1: 'oklch(0.52 0.1 268)',
+  2: 'oklch(0.6 0.075 255)',
+  3: 'oklch(0.7 0.04 240)',
+  4: 'oklch(0.76 0.07 90)',
+  5: 'oklch(0.8 0.11 68)'
+};
+
+const WEEKDAYS_LONG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const WEEKDAYS_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const MONTHS_LONG = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+/* Geometry of the 14-day mood spine: days run top (oldest) to bottom (today),
+   mood maps left (low) to right (high) — a river read downwards, not a chart. */
+const SPINE = { top: 30, step: 20, xLow: 62, xHigh: 222, days: 14 };
+
+const SAVE_SHORTCUT_HINT =
+  /Mac/i.test(navigator.platform || navigator.userAgent) ? '⌘ + ↵' : 'Strg + ↵';
+
+function moodToX(mood) {
+  return SPINE.xLow + ((mood - 1) / 4) * (SPINE.xHigh - SPINE.xLow);
+}
+
+/** Smooths a top-to-bottom point sequence by anchoring control points at the
+ *  vertical midpoint of each segment — keeps the curve monotone in y. */
+function verticalSmoothPath(points) {
+  if (points.length === 0) return '';
+  let d = 'M' + points[0].x + ' ' + points[0].y;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1], cur = points[i];
+    const midY = (prev.y + cur.y) / 2;
+    d += ' C' + prev.x + ' ' + midY + ' ' + cur.x + ' ' + midY + ' ' + cur.x + ' ' + cur.y;
+  }
+  return d;
+}
+
+function localDayKey(date) {
+  const y = String(date.getFullYear()).padStart(4, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+/** `2026-08-26` -> `MI · 26. AUGUST` for the entry stamps. */
+function formatDayStamp(dayKey) {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return WEEKDAYS_SHORT[date.getDay()] + ' · ' + day + '. ' + MONTHS_LONG[month - 1];
+}
+
+function translateMentalHealthError(error) {
+  const known = {
+    mood: 'Bitte wähle eine Stimmung zwischen 1 und 5.',
+    note: 'Die Notiz ist zu lang.',
+    body: 'Bitte schreib etwas, bevor du speicherst.'
+  };
+  return (error && known[error.field]) || 'Eingabe ungültig, bitte prüfen.';
+}
+
 class Component extends DCLogic {
-  state = { open: true, active: 'home', range: '7 Tage', calView: 'Monat', offset: 0 };
+  state = {
+    open: true, active: 'home', range: '7 Tage', calView: 'Monat', offset: 0,
+    moodEntries: [], moodSelected: 3, moodNote: '', moodError: '', moodSubmitting: false, moodExpanded: false,
+    journalEntries: [], journalDraft: '', journalError: '', journalSubmitting: false
+  };
+
+  componentDidMount() {
+    const bridge = window.mindfield && window.mindfield.mentalHealth;
+    if (!bridge) return;
+    Promise.all([bridge.listMoodEntries(), bridge.listJournalEntries()]).then(([moodResult, journalResult]) => {
+      this.setState({
+        moodEntries: moodResult.ok ? moodResult.value : [],
+        journalEntries: journalResult.ok ? journalResult.value : []
+      });
+    });
+  }
+
+  async submitMood() {
+    const bridge = window.mindfield && window.mindfield.mentalHealth;
+    if (!bridge || this.state.moodSubmitting) return;
+    this.setState({ moodSubmitting: true, moodError: '' });
+    const note = this.state.moodNote.trim();
+    const input = note ? { mood: this.state.moodSelected, note } : { mood: this.state.moodSelected };
+    const result = await bridge.addMoodEntry(input);
+    if (result.ok) {
+      this.setState((s) => ({
+        moodEntries: [...s.moodEntries, result.value],
+        moodSelected: 3, moodNote: '', moodSubmitting: false, moodError: '', moodExpanded: false
+      }));
+    } else {
+      this.setState({ moodSubmitting: false, moodError: translateMentalHealthError(result.error) });
+    }
+  }
+
+  /** Ctrl/Cmd + Enter saves, so writing never needs the mouse. */
+  onJournalKeyDown(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      this.submitJournal();
+    }
+  }
+
+  async submitJournal() {
+    const bridge = window.mindfield && window.mindfield.mentalHealth;
+    const body = this.state.journalDraft.trim();
+    if (!bridge || !body || this.state.journalSubmitting) return;
+    this.setState({ journalSubmitting: true, journalError: '' });
+    const result = await bridge.addJournalEntry({ body });
+    if (result.ok) {
+      this.setState((s) => ({
+        journalEntries: [...s.journalEntries, result.value],
+        journalDraft: '', journalSubmitting: false, journalError: ''
+      }));
+    } else {
+      this.setState({ journalSubmitting: false, journalError: translateMentalHealthError(result.error) });
+    }
+  }
+
+  mentalHealthVals() {
+    const now = new Date();
+    const today = localDayKey(now);
+
+    // One pass over the entries feeds both today's list and the 14-day spine.
+    const byDay = new Map();
+    for (const entry of this.state.moodEntries) {
+      const list = byDay.get(entry.day);
+      if (list) list.push(entry); else byDay.set(entry.day, [entry]);
+    }
+    const averageMood = (entries) =>
+      entries.reduce((sum, e) => sum + e.mood, 0) / entries.length;
+    const toStep = (mood) => Math.max(1, Math.min(5, Math.round(mood)));
+
+    const todayEntries = byDay.get(today) || [];
+    const todayMoods = todayEntries.map((e) => ({
+      color: MOOD_COLOR[toStep(e.mood)],
+      time: formatTime(e.recordedAt),
+      label: e.note || MOOD_LABEL[toStep(e.mood)]
+    }));
+    const roundedAvg = todayEntries.length ? toStep(averageMood(todayEntries)) : null;
+
+    const spineNodes = [];
+    const spinePoints = [];
+    for (let i = 0; i < SPINE.days; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (SPINE.days - 1 - i));
+      const entries = byDay.get(localDayKey(date)) || [];
+      const isToday = i === SPINE.days - 1;
+      const y = SPINE.top + i * SPINE.step;
+      const step = entries.length ? toStep(averageMood(entries)) : null;
+      const x = step === null ? moodToX(3) : moodToX(step);
+      if (step !== null) spinePoints.push({ x, y });
+      spineNodes.push({
+        x, y, labelY: y + 3,
+        label: WEEKDAYS_SHORT[date.getDay()] + ' ' + date.getDate(),
+        labelColor: isToday ? 'oklch(0.45 0.05 248)' : 'oklch(0.79 0.02 245)',
+        r: step === null ? 2 : (isToday ? 5 : 3.6),
+        fill: step === null ? 'oklch(0.92 0.012 245)' : MOOD_COLOR[step],
+        stroke: isToday && step !== null ? '#fff' : 'transparent',
+        strokeWidth: isToday && step !== null ? 1.6 : 0
+      });
+    }
+
+    const recentJournalEntries = this.state.journalEntries
+      .slice()
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, 5)
+      .map((j) => ({
+        stamp: formatDayStamp(j.day) + ' · ' + formatTime(j.createdAt),
+        snippet: j.body.length > 420 ? j.body.slice(0, 420) + '…' : j.body
+      }));
+
+    const submitButtonStyle = (disabled) => ({
+      border: 'none', cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
+      fontSize: '12.5px', fontWeight: 500, padding: '7px 15px', borderRadius: '9px',
+      background: disabled ? 'rgba(255,255,255,0.18)' : '#fff',
+      color: disabled ? 'rgba(255,255,255,0.55)' : 'oklch(0.32 0.06 250)'
+    });
+
+    // Quiet, typographic actions — the journal page should read as a page, so
+    // its buttons stay hairline-and-mono rather than filled pills.
+    const quietButtonStyle = (disabled) => ({
+      background: 'transparent', cursor: disabled ? 'default' : 'pointer',
+      border: '1px solid ' + (disabled ? 'oklch(0.94 0.012 245)' : 'oklch(0.88 0.02 245)'),
+      borderRadius: '8px', padding: '8px 14px',
+      fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px',
+      letterSpacing: '0.1em', textTransform: 'uppercase',
+      color: disabled ? 'oklch(0.82 0.015 245)' : 'oklch(0.5 0.04 248)',
+      transition: 'border-color 140ms, color 140ms'
+    });
+
+    const words = this.state.journalDraft.trim().split(/\s+/).filter(Boolean).length;
+    const moodSubmitDisabled = this.state.moodSubmitting;
+    const journalSubmitDisabled = this.state.journalDraft.trim().length === 0 || this.state.journalSubmitting;
+    const expanded = this.state.moodExpanded;
+
+    return {
+      moodSliderValue: this.state.moodSelected,
+      moodSliderLabelText: MOOD_LABEL[this.state.moodSelected],
+      onMoodSliderInput: (e) => this.setState({ moodSelected: Number(e.target.value) }),
+      moodNote: this.state.moodNote,
+      onMoodNoteInput: (e) => this.setState({ moodNote: e.target.value }),
+      moodError: this.state.moodError,
+      moodSubmitDisabled,
+      moodSubmitStyle: submitButtonStyle(moodSubmitDisabled),
+      moodSaveStyle: quietButtonStyle(moodSubmitDisabled),
+      moodCurrentColor: MOOD_COLOR[this.state.moodSelected],
+      submitMood: () => this.submitMood(),
+      hasTodayMoods: todayMoods.length > 0,
+      todayMoods,
+
+      todayDayNumber: now.getDate(),
+      todayWeekday: WEEKDAYS_LONG[now.getDay()],
+      todayMonthYear: MONTHS_LONG[now.getMonth()] + ' ' + now.getFullYear(),
+      journalWordCount: words === 1 ? '1 Wort' : words + ' Wörter',
+      saveShortcutHint: SAVE_SHORTCUT_HINT,
+      onJournalKeyDown: (e) => this.onJournalKeyDown(e),
+      spineNodes,
+      spinePath: verticalSmoothPath(spinePoints),
+      spineGuides: [1, 3, 5].map((m) => ({ x: moodToX(m) })),
+
+      toggleMoodExpanded: () => this.setState((s) => ({ moodExpanded: !s.moodExpanded })),
+      moodChevronStyle: {
+        color: 'rgba(255,255,255,0.75)', fontSize: '16px', lineHeight: 1,
+        transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 320ms ease'
+      },
+      moodExpandWrapStyle: {
+        display: 'grid', gridTemplateRows: expanded ? '1fr' : '0fr',
+        transition: 'grid-template-rows 420ms cubic-bezier(0.4,0,0.2,1)'
+      },
+      moodOrbColor: MOOD_ORB_COLOR,
+      moodHeroTitle: roundedAvg ? MOOD_LABEL[roundedAvg] : 'Wie fühlst du dich heute?',
+      moodHeroSubtitle: todayEntries.length
+        ? (todayEntries.length === 1 ? '1 Eintrag heute' : todayEntries.length + ' Einträge heute') + ' · Tippen für einen weiteren Check-in'
+        : 'Tippen, um deine Stimmung einzutragen',
+      moodHeroStyle: {
+        position: 'relative', overflow: 'hidden', borderRadius: '20px', border: 'none',
+        padding: '22px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        background: 'radial-gradient(120% 140% at 85% 15%, oklch(0.8 0.07 235) 0%, oklch(0.42 0.1 250) 42%, oklch(0.16 0.05 262) 100%)',
+        boxShadow: '0 10px 30px oklch(0.15 0.05 260 / 0.35)', transition: 'padding 420ms ease'
+      },
+
+      journalDraft: this.state.journalDraft,
+      onJournalInput: (e) => this.setState({ journalDraft: e.target.value }),
+      journalError: this.state.journalError,
+      journalSubmitDisabled,
+      journalSaveStyle: quietButtonStyle(journalSubmitDisabled),
+      submitJournal: () => this.submitJournal(),
+      hasJournalEntries: recentJournalEntries.length > 0,
+      recentJournalEntries
+    };
+  }
 
   segStyle(on) {
     return {
@@ -555,6 +988,7 @@ class Component extends DCLogic {
       { id: 'home', label: 'Übersicht', icon: 'home' },
       { id: 'activity', label: 'Aktivität', icon: 'activity' },
       { id: 'calendar', label: 'Kalender', icon: 'plan' },
+      { id: 'journal', label: 'Journal', icon: 'journal' },
       { id: 'assistant', label: 'KI-Assistent', icon: 'assistant' }
     ];
     const all = items.concat([{ id: 'settings', label: 'Einstellungen' }, { id: 'profile', label: 'Lena Maurer' }]);
@@ -625,8 +1059,11 @@ class Component extends DCLogic {
       activeLabel: activeItem ? activeItem.label : 'Übersicht',
 
       ...this.calendarVals(),
-      showDashboard: this.state.active !== 'calendar',
+      ...this.mentalHealthVals(),
+      showDashboard: this.state.active !== 'calendar' && this.state.active !== 'journal',
       showCalendar: this.state.active === 'calendar',
+      showJournal: this.state.active === 'journal',
+      showTabs: this.state.active !== 'journal',
       tabs: this.state.active === 'calendar'
         ? ['Monat', 'Woche', 'Tag'].map(label => ({
             label, select: () => this.setState({ calView: label, offset: 0 }),

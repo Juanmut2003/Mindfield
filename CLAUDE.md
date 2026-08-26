@@ -24,6 +24,7 @@ As described by the user (2026-08-24) — this is the intended shape of the app,
 - **Dashboard (Startseite)** — top-level screen; surfaces a condensed summary of data pulled from the other screens, with a **daily update** as the topmost, most prominent element.
 - **Aktivitäten (Activity)** — all data the connected fitness tracker provides (steps, pulse, sleep, training sessions). This is core use case 1.
 - **Kalender (Calendar)** — normal calendar features (month/week/day views, planned trainings), *plus* a display of the **mood logged for that day** — this is where use cases 1 and 2 meet on a shared timeline.
+- **Journal** — where mood check-ins and free-text journal entries are actually recorded (added 2026-08-26). The Dashboard's daily-update card summarises today's mood and expands inline into a quick check-in; the Journal screen is the dedicated place for both check-ins and writing. This is the concrete UI for core use case 2.
 - **KI-Assistent (AI Assistant)** — a chat interface to talk with the assistant directly. This is core use case 3.
 - **Kontakte (Contacts)** — lets the athlete message/contact therapists or psychiatrists directly from within the app. This is the concrete UI for core use case 4 (referral).
 - **Fitness tracker integration (future)** — eventual goal: connect to various third-party fitness trackers via their APIs so real training/pulse/sleep data flows in automatically. Not scoped in detail yet.
