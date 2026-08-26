@@ -159,12 +159,12 @@
       </sc-if>
     </header>
 
-    <sc-if value="{{ bridgeBroken }}" hint-placeholder-val="{{ false }}">
+    <sc-if value="{{ hasBlockingError }}" hint-placeholder-val="{{ false }}">
     <div style="margin: 20px 40px 0; padding: 14px 17px; border: 1px solid oklch(0.85 0.08 45); background: oklch(0.975 0.025 70); border-radius: 12px; display: flex; gap: 12px; align-items: flex-start">
       <span style="flex: 0 0 auto; width: 19px; height: 19px; border-radius: 50%; background: oklch(0.68 0.15 45); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; margin-top: 1px">!</span>
       <div>
-        <div style="font-size: 13.5px; font-weight: 600; color: oklch(0.44 0.12 42)">Speichern ist gerade nicht möglich</div>
-        <div style="font-size: 12.5px; line-height: 1.55; color: oklch(0.5 0.06 45); margin-top: 4px">Die Verbindung zum Datenspeicher konnte nicht aufgebaut werden. Deine bereits gesicherten Einträge sind unverändert — neue würden aber verloren gehen, deshalb sind die Eingabefelder gesperrt. Meist hilft ein Neustart der App.</div>
+        <div style="font-size: 13.5px; font-weight: 600; color: oklch(0.44 0.12 42)">{{ blockingTitle }}</div>
+        <div style="font-size: 12.5px; line-height: 1.55; color: oklch(0.5 0.06 45); margin-top: 4px">{{ blockingText }}</div>
       </div>
     </div>
     </sc-if>
@@ -197,10 +197,10 @@
               <div style="font-size: 12.5px; color: oklch(0.95 0.02 250 / 0.8); margin-bottom: 6px">{{ moodSliderLabelText }}</div>
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; max-width: 420px">
                 <span style="font-size: 20px; line-height: 1">😞</span>
-                <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ bridgeBroken }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.85)); --mood-thumb: #fff; --mood-thumb-ring: rgba(255,255,255,0.55)" />
+                <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ inputsLocked }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.85)); --mood-thumb: #fff; --mood-thumb-ring: rgba(255,255,255,0.55)" />
                 <span style="font-size: 20px; line-height: 1">😄</span>
               </div>
-              <input type="text" placeholder="Kurze Notiz (optional)" disabled="{{ bridgeBroken }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; max-width: 420px; box-sizing: border-box; border: none; border-bottom: 1px solid rgba(255,255,255,0.28); background: transparent; color: #fff; padding: 7px 2px; font-family: inherit; font-size: 13px; margin-bottom: 16px; outline: none" />
+              <input type="text" placeholder="Kurze Notiz (optional)" disabled="{{ inputsLocked }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; max-width: 420px; box-sizing: border-box; border: none; border-bottom: 1px solid rgba(255,255,255,0.28); background: transparent; color: #fff; padding: 7px 2px; font-family: inherit; font-size: 13px; margin-bottom: 16px; outline: none" />
               <div style="display: flex; align-items: center; gap: 10px">
                 <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSubmitStyle }}">Eintragen</button>
                 <sc-if value="{{ moodError }}" hint-placeholder-val="{{ '' }}">
@@ -484,7 +484,7 @@
           <span style="margin-left: auto; padding-bottom: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(0.76 0.02 245)">{{ journalWordCount }}</span>
         </div>
 
-        <textarea class="journal-write" placeholder="Schreib los — was war heute los, was geht dir nach?" disabled="{{ bridgeBroken }}" value="{{ journalDraft }}" onInput="{{ onJournalInput }}" onKeyDown="{{ onJournalKeyDown }}"></textarea>
+        <textarea class="journal-write" placeholder="Schreib los — was war heute los, was geht dir nach?" disabled="{{ inputsLocked }}" value="{{ journalDraft }}" onInput="{{ onJournalInput }}" onKeyDown="{{ onJournalKeyDown }}"></textarea>
 
         <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px; padding-top: 16px; border-top: 1px solid oklch(0.94 0.012 245)">
           <button onClick="{{ submitJournal }}" disabled="{{ journalSubmitDisabled }}" style="{{ journalSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintrag sichern</button>
@@ -514,11 +514,11 @@
 
         <div style="display: flex; align-items: center; gap: 10px">
           <span style="font-size: 17px; line-height: 1">😞</span>
-          <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ bridgeBroken }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, oklch(0.52 0.1 268), oklch(0.7 0.04 240), oklch(0.8 0.11 68)); --mood-thumb: #fff; --mood-thumb-ring: {{ moodCurrentColor }}" />
+          <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ inputsLocked }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, oklch(0.52 0.1 268), oklch(0.7 0.04 240), oklch(0.8 0.11 68)); --mood-thumb: #fff; --mood-thumb-ring: {{ moodCurrentColor }}" />
           <span style="font-size: 17px; line-height: 1">😄</span>
         </div>
 
-        <input type="text" placeholder="Notiz (optional)" disabled="{{ bridgeBroken }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; box-sizing: border-box; border: none; border-bottom: 1px solid oklch(0.9 0.015 245); background: transparent; padding: 8px 2px; font-family: inherit; font-size: 12.5px; color: oklch(0.34 0.02 250); outline: none; margin: 14px 0 14px" />
+        <input type="text" placeholder="Notiz (optional)" disabled="{{ inputsLocked }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; box-sizing: border-box; border: none; border-bottom: 1px solid oklch(0.9 0.015 245); background: transparent; padding: 8px 2px; font-family: inherit; font-size: 12.5px; color: oklch(0.34 0.02 250); outline: none; margin: 14px 0 14px" />
 
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
           <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintragen</button>
@@ -634,13 +634,42 @@ function formatDayStamp(dayKey) {
 
 const BRIDGE_ERROR_TEXT = 'Nicht gespeichert — keine Verbindung zum Datenspeicher.';
 
+/* Conditions that make the capture surface lock itself. Both mean the app
+   cannot tell the truth about the athlete's data, so it stops pretending to
+   accept input. */
+const BRIDGE_UNAVAILABLE = {
+  title: 'Speichern ist gerade nicht möglich',
+  text:
+    'Die Verbindung zum Datenspeicher konnte nicht aufgebaut werden. Deine bereits ' +
+    'gesicherten Einträge sind unverändert — neue würden aber verloren gehen, deshalb ' +
+    'sind die Eingabefelder gesperrt. Meist hilft ein Neustart der App.'
+};
+
+const LOAD_FAILED = {
+  title: 'Deine Einträge konnten nicht geladen werden',
+  text:
+    'Die gespeicherten Daten liegen unverändert auf der Festplatte, konnten hier aber ' +
+    'nicht angezeigt werden. Damit du nichts doppelt schreibst oder für verloren hältst, ' +
+    'sind die Eingabefelder gesperrt. Bitte starte die App neu.'
+};
+
+/**
+ * Turns an IPC error envelope into something the athlete can act on.
+ *
+ * Only a `validation` error is theirs to fix. Anything else — a full disk, a
+ * locked file, an unregistered handler — is the app's fault, and phrasing it
+ * as bad input would send them off editing a note that was never the problem.
+ */
 function translateMentalHealthError(error) {
+  if (!error || error.code !== 'validation') {
+    return 'Nicht gespeichert — der Eintrag konnte nicht geschrieben werden.';
+  }
   const known = {
     mood: 'Bitte wähle eine Stimmung zwischen 1 und 5.',
     note: 'Die Notiz ist zu lang.',
     body: 'Bitte schreib etwas, bevor du speicherst.'
   };
-  return (error && known[error.field]) || 'Eingabe ungültig, bitte prüfen.';
+  return known[error.field] || 'Eingabe ungültig, bitte prüfen.';
 }
 
 class Component extends DCLogic {
@@ -648,7 +677,7 @@ class Component extends DCLogic {
     open: true, active: 'home', range: '7 Tage', calView: 'Monat', offset: 0,
     moodEntries: [], moodSelected: 3, moodNote: '', moodError: '', moodSubmitting: false, moodExpanded: false,
     journalEntries: [], journalDraft: '', journalError: '', journalSubmitting: false,
-    bridgeBroken: false
+    blockingError: null
   };
 
   /**
@@ -660,39 +689,73 @@ class Component extends DCLogic {
     return (window.mindfield && window.mindfield.mentalHealth) || null;
   }
 
-  componentDidMount() {
+  /**
+   * The single way this component talks to the store.
+   *
+   * The IPC layer answers with an envelope instead of rejecting — but only for
+   * errors it gets to see. A missing preload, an unregistered handler or a
+   * main process that went away make `invoke` itself reject, which would
+   * become an unhandled rejection and leave the UI stuck mid-submit with
+   * nothing on screen. Funnelling every call through here means a dead
+   * channel always turns into a visible state, never into silence.
+   *
+   * @returns the IPC envelope, or `null` when the channel itself failed.
+   */
+  async callBridge(run) {
     const bridge = this.bridge();
     if (!bridge) {
-      this.setState({ bridgeBroken: true });
+      this.setState({ blockingError: BRIDGE_UNAVAILABLE });
+      return null;
+    }
+    try {
+      return await run(bridge);
+    } catch (error) {
+      console.error('Mental-health bridge call failed', error);
+      this.setState({ blockingError: BRIDGE_UNAVAILABLE });
+      return null;
+    }
+  }
+
+  componentDidMount() {
+    this.loadEntries();
+  }
+
+  async loadEntries() {
+    const results = await this.callBridge((bridge) =>
+      Promise.all([bridge.listMoodEntries(), bridge.listJournalEntries()])
+    );
+    if (results === null) return;
+
+    const [moodResult, journalResult] = results;
+    // Falling back to an empty list here would tell the athlete their journal
+    // is gone. Say the truth instead: it exists, we just could not read it.
+    if (!moodResult.ok || !journalResult.ok) {
+      this.setState({ blockingError: LOAD_FAILED });
       return;
     }
-    Promise.all([bridge.listMoodEntries(), bridge.listJournalEntries()]).then(([moodResult, journalResult]) => {
-      this.setState({
-        moodEntries: moodResult.ok ? moodResult.value : [],
-        journalEntries: journalResult.ok ? journalResult.value : []
-      });
-    });
+    this.setState({ moodEntries: moodResult.value, journalEntries: journalResult.value });
   }
 
   async submitMood() {
-    const bridge = this.bridge();
-    if (!bridge) {
-      this.setState({ bridgeBroken: true, moodError: BRIDGE_ERROR_TEXT });
-      return;
-    }
     if (this.state.moodSubmitting) return;
     this.setState({ moodSubmitting: true, moodError: '' });
+
     const note = this.state.moodNote.trim();
     const input = note ? { mood: this.state.moodSelected, note } : { mood: this.state.moodSelected };
-    const result = await bridge.addMoodEntry(input);
-    if (result.ok) {
-      this.setState((s) => ({
-        moodEntries: [...s.moodEntries, result.value],
-        moodSelected: 3, moodNote: '', moodSubmitting: false, moodError: '', moodExpanded: false
-      }));
-    } else {
-      this.setState({ moodSubmitting: false, moodError: translateMentalHealthError(result.error) });
+    const result = await this.callBridge((bridge) => bridge.addMoodEntry(input));
+
+    if (result === null) {
+      this.setState({ moodSubmitting: false, moodError: BRIDGE_ERROR_TEXT });
+      return;
     }
+    if (!result.ok) {
+      this.setState({ moodSubmitting: false, moodError: translateMentalHealthError(result.error) });
+      return;
+    }
+    this.setState((s) => ({
+      moodEntries: [...s.moodEntries, result.value],
+      moodSelected: 3, moodNote: '', moodSubmitting: false, moodError: '', moodExpanded: false
+    }));
   }
 
   /** Ctrl/Cmd + Enter saves, so writing never needs the mouse. */
@@ -704,23 +767,25 @@ class Component extends DCLogic {
   }
 
   async submitJournal() {
-    const bridge = this.bridge();
-    if (!bridge) {
-      this.setState({ bridgeBroken: true, journalError: BRIDGE_ERROR_TEXT });
-      return;
-    }
     const body = this.state.journalDraft.trim();
     if (!body || this.state.journalSubmitting) return;
     this.setState({ journalSubmitting: true, journalError: '' });
-    const result = await bridge.addJournalEntry({ body });
-    if (result.ok) {
-      this.setState((s) => ({
-        journalEntries: [...s.journalEntries, result.value],
-        journalDraft: '', journalSubmitting: false, journalError: ''
-      }));
-    } else {
-      this.setState({ journalSubmitting: false, journalError: translateMentalHealthError(result.error) });
+
+    const result = await this.callBridge((bridge) => bridge.addJournalEntry({ body }));
+
+    if (result === null) {
+      this.setState({ journalSubmitting: false, journalError: BRIDGE_ERROR_TEXT });
+      return;
     }
+    if (!result.ok) {
+      this.setState({ journalSubmitting: false, journalError: translateMentalHealthError(result.error) });
+      return;
+    }
+    // The draft is only cleared once the store confirmed the write.
+    this.setState((s) => ({
+      journalEntries: [...s.journalEntries, result.value],
+      journalDraft: '', journalSubmitting: false, journalError: ''
+    }));
   }
 
   mentalHealthVals() {
@@ -797,14 +862,18 @@ class Component extends DCLogic {
     const words = this.state.journalDraft.trim().split(/\s+/).filter(Boolean).length;
     // Without the preload bridge every write would be discarded, so the whole
     // capture surface locks rather than pretending to accept input.
-    const bridgeBroken = this.state.bridgeBroken;
-    const moodSubmitDisabled = this.state.moodSubmitting || bridgeBroken;
+    const blockingError = this.state.blockingError;
+    const inputsLocked = blockingError !== null;
+    const moodSubmitDisabled = this.state.moodSubmitting || inputsLocked;
     const journalSubmitDisabled =
-      this.state.journalDraft.trim().length === 0 || this.state.journalSubmitting || bridgeBroken;
+      this.state.journalDraft.trim().length === 0 || this.state.journalSubmitting || inputsLocked;
     const expanded = this.state.moodExpanded;
 
     return {
-      bridgeBroken,
+      inputsLocked,
+      hasBlockingError: inputsLocked,
+      blockingTitle: blockingError ? blockingError.title : '',
+      blockingText: blockingError ? blockingError.text : '',
       moodSliderValue: this.state.moodSelected,
       moodSliderLabelText: MOOD_LABEL[this.state.moodSelected],
       onMoodSliderInput: (e) => this.setState({ moodSelected: Number(e.target.value) }),
