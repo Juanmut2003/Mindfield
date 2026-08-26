@@ -55,6 +55,10 @@
     transition: transform 120ms ease;
   }
   .mood-range:active::-webkit-slider-thumb { transform: scale(1.15); }
+  /* Desaturating rather than recolouring keeps one rule working on both the
+     light journal margin and the dark dashboard card. */
+  .mood-range:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.4; }
+  .mood-range:disabled::-webkit-slider-thumb { box-shadow: none; }
 </style>
 </helmet>
 <div style="display: flex; min-height: 100vh; background: #fbfcfe; color: oklch(0.32 0.02 250)">
