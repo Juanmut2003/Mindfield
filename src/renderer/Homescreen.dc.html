@@ -155,6 +155,16 @@
       </sc-if>
     </header>
 
+    <sc-if value="{{ bridgeBroken }}" hint-placeholder-val="{{ false }}">
+    <div style="margin: 20px 40px 0; padding: 14px 17px; border: 1px solid oklch(0.85 0.08 45); background: oklch(0.975 0.025 70); border-radius: 12px; display: flex; gap: 12px; align-items: flex-start">
+      <span style="flex: 0 0 auto; width: 19px; height: 19px; border-radius: 50%; background: oklch(0.68 0.15 45); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; margin-top: 1px">!</span>
+      <div>
+        <div style="font-size: 13.5px; font-weight: 600; color: oklch(0.44 0.12 42)">Speichern ist gerade nicht möglich</div>
+        <div style="font-size: 12.5px; line-height: 1.55; color: oklch(0.5 0.06 45); margin-top: 4px">Die Verbindung zum Datenspeicher konnte nicht aufgebaut werden. Deine bereits gesicherten Einträge sind unverändert — neue würden aber verloren gehen, deshalb sind die Eingabefelder gesperrt. Meist hilft ein Neustart der App.</div>
+      </div>
+    </div>
+    </sc-if>
+
     <sc-if value="{{ showDashboard }}" hint-placeholder-val="{{ true }}">
     <div style="padding: 26px 40px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1180px; width: 100%">
 
@@ -183,10 +193,10 @@
               <div style="font-size: 12.5px; color: oklch(0.95 0.02 250 / 0.8); margin-bottom: 6px">{{ moodSliderLabelText }}</div>
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; max-width: 420px">
                 <span style="font-size: 20px; line-height: 1">😞</span>
-                <input class="mood-range" type="range" min="1" max="5" step="1" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.85)); --mood-thumb: #fff; --mood-thumb-ring: rgba(255,255,255,0.55)" />
+                <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ bridgeBroken }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.85)); --mood-thumb: #fff; --mood-thumb-ring: rgba(255,255,255,0.55)" />
                 <span style="font-size: 20px; line-height: 1">😄</span>
               </div>
-              <input type="text" placeholder="Kurze Notiz (optional)" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; max-width: 420px; box-sizing: border-box; border: none; border-bottom: 1px solid rgba(255,255,255,0.28); background: transparent; color: #fff; padding: 7px 2px; font-family: inherit; font-size: 13px; margin-bottom: 16px; outline: none" />
+              <input type="text" placeholder="Kurze Notiz (optional)" disabled="{{ bridgeBroken }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; max-width: 420px; box-sizing: border-box; border: none; border-bottom: 1px solid rgba(255,255,255,0.28); background: transparent; color: #fff; padding: 7px 2px; font-family: inherit; font-size: 13px; margin-bottom: 16px; outline: none" />
               <div style="display: flex; align-items: center; gap: 10px">
                 <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSubmitStyle }}">Eintragen</button>
                 <sc-if value="{{ moodError }}" hint-placeholder-val="{{ '' }}">
@@ -470,7 +480,7 @@
           <span style="margin-left: auto; padding-bottom: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(0.76 0.02 245)">{{ journalWordCount }}</span>
         </div>
 
-        <textarea class="journal-write" placeholder="Schreib los — was war heute los, was geht dir nach?" value="{{ journalDraft }}" onInput="{{ onJournalInput }}" onKeyDown="{{ onJournalKeyDown }}"></textarea>
+        <textarea class="journal-write" placeholder="Schreib los — was war heute los, was geht dir nach?" disabled="{{ bridgeBroken }}" value="{{ journalDraft }}" onInput="{{ onJournalInput }}" onKeyDown="{{ onJournalKeyDown }}"></textarea>
 
         <div style="display: flex; align-items: center; gap: 14px; margin-top: 18px; padding-top: 16px; border-top: 1px solid oklch(0.94 0.012 245)">
           <button onClick="{{ submitJournal }}" disabled="{{ journalSubmitDisabled }}" style="{{ journalSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintrag sichern</button>
@@ -500,11 +510,11 @@
 
         <div style="display: flex; align-items: center; gap: 10px">
           <span style="font-size: 17px; line-height: 1">😞</span>
-          <input class="mood-range" type="range" min="1" max="5" step="1" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, oklch(0.52 0.1 268), oklch(0.7 0.04 240), oklch(0.8 0.11 68)); --mood-thumb: #fff; --mood-thumb-ring: {{ moodCurrentColor }}" />
+          <input class="mood-range" type="range" min="1" max="5" step="1" disabled="{{ bridgeBroken }}" value="{{ moodSliderValue }}" onInput="{{ onMoodSliderInput }}" style="flex: 1; --mood-track: linear-gradient(90deg, oklch(0.52 0.1 268), oklch(0.7 0.04 240), oklch(0.8 0.11 68)); --mood-thumb: #fff; --mood-thumb-ring: {{ moodCurrentColor }}" />
           <span style="font-size: 17px; line-height: 1">😄</span>
         </div>
 
-        <input type="text" placeholder="Notiz (optional)" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; box-sizing: border-box; border: none; border-bottom: 1px solid oklch(0.9 0.015 245); background: transparent; padding: 8px 2px; font-family: inherit; font-size: 12.5px; color: oklch(0.34 0.02 250); outline: none; margin: 14px 0 14px" />
+        <input type="text" placeholder="Notiz (optional)" disabled="{{ bridgeBroken }}" value="{{ moodNote }}" onInput="{{ onMoodNoteInput }}" style="width: 100%; box-sizing: border-box; border: none; border-bottom: 1px solid oklch(0.9 0.015 245); background: transparent; padding: 8px 2px; font-family: inherit; font-size: 12.5px; color: oklch(0.34 0.02 250); outline: none; margin: 14px 0 14px" />
 
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
           <button onClick="{{ submitMood }}" disabled="{{ moodSubmitDisabled }}" style="{{ moodSaveStyle }}" style-hover="border-color: oklch(0.74 0.06 245); color: oklch(0.4 0.06 245)">Eintragen</button>
@@ -618,6 +628,8 @@ function formatDayStamp(dayKey) {
   return WEEKDAYS_SHORT[date.getDay()] + ' · ' + day + '. ' + MONTHS_LONG[month - 1];
 }
 
+const BRIDGE_ERROR_TEXT = 'Nicht gespeichert — keine Verbindung zum Datenspeicher.';
+
 function translateMentalHealthError(error) {
   const known = {
     mood: 'Bitte wähle eine Stimmung zwischen 1 und 5.',
@@ -631,12 +643,25 @@ class Component extends DCLogic {
   state = {
     open: true, active: 'home', range: '7 Tage', calView: 'Monat', offset: 0,
     moodEntries: [], moodSelected: 3, moodNote: '', moodError: '', moodSubmitting: false, moodExpanded: false,
-    journalEntries: [], journalDraft: '', journalError: '', journalSubmitting: false
+    journalEntries: [], journalDraft: '', journalError: '', journalSubmitting: false,
+    bridgeBroken: false
   };
 
+  /**
+   * The preload exposes this bridge. When it is missing the preload failed to
+   * load, and every write would be silently discarded — so callers must treat
+   * `null` as a visible error, never as "skip quietly".
+   */
+  bridge() {
+    return (window.mindfield && window.mindfield.mentalHealth) || null;
+  }
+
   componentDidMount() {
-    const bridge = window.mindfield && window.mindfield.mentalHealth;
-    if (!bridge) return;
+    const bridge = this.bridge();
+    if (!bridge) {
+      this.setState({ bridgeBroken: true });
+      return;
+    }
     Promise.all([bridge.listMoodEntries(), bridge.listJournalEntries()]).then(([moodResult, journalResult]) => {
       this.setState({
         moodEntries: moodResult.ok ? moodResult.value : [],
@@ -646,8 +671,12 @@ class Component extends DCLogic {
   }
 
   async submitMood() {
-    const bridge = window.mindfield && window.mindfield.mentalHealth;
-    if (!bridge || this.state.moodSubmitting) return;
+    const bridge = this.bridge();
+    if (!bridge) {
+      this.setState({ bridgeBroken: true, moodError: BRIDGE_ERROR_TEXT });
+      return;
+    }
+    if (this.state.moodSubmitting) return;
     this.setState({ moodSubmitting: true, moodError: '' });
     const note = this.state.moodNote.trim();
     const input = note ? { mood: this.state.moodSelected, note } : { mood: this.state.moodSelected };
@@ -671,9 +700,13 @@ class Component extends DCLogic {
   }
 
   async submitJournal() {
-    const bridge = window.mindfield && window.mindfield.mentalHealth;
+    const bridge = this.bridge();
+    if (!bridge) {
+      this.setState({ bridgeBroken: true, journalError: BRIDGE_ERROR_TEXT });
+      return;
+    }
     const body = this.state.journalDraft.trim();
-    if (!bridge || !body || this.state.journalSubmitting) return;
+    if (!body || this.state.journalSubmitting) return;
     this.setState({ journalSubmitting: true, journalError: '' });
     const result = await bridge.addJournalEntry({ body });
     if (result.ok) {
@@ -758,11 +791,16 @@ class Component extends DCLogic {
     });
 
     const words = this.state.journalDraft.trim().split(/\s+/).filter(Boolean).length;
-    const moodSubmitDisabled = this.state.moodSubmitting;
-    const journalSubmitDisabled = this.state.journalDraft.trim().length === 0 || this.state.journalSubmitting;
+    // Without the preload bridge every write would be discarded, so the whole
+    // capture surface locks rather than pretending to accept input.
+    const bridgeBroken = this.state.bridgeBroken;
+    const moodSubmitDisabled = this.state.moodSubmitting || bridgeBroken;
+    const journalSubmitDisabled =
+      this.state.journalDraft.trim().length === 0 || this.state.journalSubmitting || bridgeBroken;
     const expanded = this.state.moodExpanded;
 
     return {
+      bridgeBroken,
       moodSliderValue: this.state.moodSelected,
       moodSliderLabelText: MOOD_LABEL[this.state.moodSelected],
       onMoodSliderInput: (e) => this.setState({ moodSelected: Number(e.target.value) }),
