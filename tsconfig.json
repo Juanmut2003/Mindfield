@@ -11,5 +11,10 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/main/**/*.ts"],
-  "exclude": ["src/main/**/*.test.ts"]
+  // preload.ts is bundled by esbuild, not tsc: a sandboxed preload cannot
+  // require() relative files, so tsc's multi-file output would break it. It
+  // used to be emitted here and overwritten afterwards, which meant running
+  // build:main alone left a broken preload behind. Excluding it from emit
+  // removes that trap; tsconfig.test.json still type-checks the file.
+  "exclude": ["src/main/**/*.test.ts", "src/main/preload.ts"]
 }
