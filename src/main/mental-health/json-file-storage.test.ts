@@ -101,6 +101,93 @@ describe('JsonFileStorage', () => {
     await expect(new JsonFileStorage(flat).read()).rejects.toThrow(/newer version/);
   });
 
+  describe('with a cipher', () => {
+    /** Reversible stand-in for safeStorage, which needs an Electron process. */
+    const cipher = {
+      encrypt: (plaintext: string) => Buffer.from(plaintext, 'utf8').toString('base64'),
+      decrypt: (payload: string) => Buffer.from(payload, 'base64').toString('utf8')
+    };
+
+    const withJournalEntry = () => {
+      const snapshot = emptySnapshot();
+      snapshot.journalEntries.push({
+        id: 'id-1',
+        day: '2026-08-24',
+        createdAt: '2026-08-24T09:30:00.000Z',
+        updatedAt: '2026-08-24T09:30:00.000Z',
+        body: 'schwerer Tag nach dem Wettkampf'
+      });
+      return snapshot;
+    };
+
+    it('round-trips a snapshot through encryption', async () => {
+      const storage = new JsonFileStorage(filePath, { cipher });
+      const snapshot = withJournalEntry();
+
+      await storage.write(snapshot);
+
+      expect(await storage.read()).toEqual(snapshot);
+    });
+
+    it('leaves no readable journal text on disk', async () => {
+      await new JsonFileStorage(filePath, { cipher }).write(withJournalEntry());
+
+      const contents = await readFile(filePath, 'utf8');
+      expect(contents).not.toContain('schwerer Tag');
+      expect(contents).not.toContain('journalEntries');
+    });
+
+    it('reads a pre-encryption file and reports that it needs migrating', async () => {
+      const plain = new JsonFileStorage(filePath);
+      await plain.write(withJournalEntry());
+
+      const encrypting = new JsonFileStorage(filePath, { cipher });
+      expect(await encrypting.read()).toEqual(withJournalEntry());
+      expect(encrypting.needsEncryptionMigration).toBe(true);
+    });
+
+    it('stops reporting a migration need once the file is encrypted', async () => {
+      const storage = new JsonFileStorage(filePath, { cipher });
+      await storage.write(withJournalEntry());
+
+      await storage.read();
+
+      expect(storage.needsEncryptionMigration).toBe(false);
+    });
+
+    it('never asks for migration when no cipher is configured', async () => {
+      const storage = new JsonFileStorage(filePath);
+      await storage.write(emptySnapshot());
+
+      await storage.read();
+
+      expect(storage.needsEncryptionMigration).toBe(false);
+    });
+
+    it('refuses an encrypted file when no key is available, rather than reporting no data', async () => {
+      await new JsonFileStorage(filePath, { cipher }).write(withJournalEntry());
+
+      await expect(new JsonFileStorage(filePath).read()).rejects.toThrow(
+        /encrypted, but no decryption key/
+      );
+    });
+
+    it('fails loudly when the key does not fit the file', async () => {
+      await new JsonFileStorage(filePath, { cipher }).write(withJournalEntry());
+
+      const wrongKey = {
+        encrypt: cipher.encrypt,
+        decrypt: () => {
+          throw new Error('DPAPI: key not found');
+        }
+      };
+
+      await expect(new JsonFileStorage(filePath, { cipher: wrongKey }).read()).rejects.toThrow(
+        /app data folder/
+      );
+    });
+  });
+
   it('writes readable, diff-friendly JSON', async () => {
     await new JsonFileStorage(filePath).write(emptySnapshot());
 
