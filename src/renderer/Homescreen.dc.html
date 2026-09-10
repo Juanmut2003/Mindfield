@@ -237,7 +237,6 @@
             <span style="font-size: 14.5px; font-weight: 600">Aktive Minuten</span>
             <span style="font-size: 11.5px; color: oklch(0.7 0.02 245)">7 Tage · Ziel 45 min/Tag</span>
             <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.62 0.05 245)">Ø 52 min</span>
-            <button onClick="{{ goAssistant }}" style="{{ jumpStyle }}" style-hover="border-color: oklch(0.86 0.05 240); background: oklch(0.98 0.014 240)">Mit KI analysieren ›</button>
           </div>
           <svg viewBox="0 0 560 190" width="100%" height="190" preserveAspectRatio="none" style="display: block; overflow: visible">
             <line x1="0" y1="30" x2="560" y2="30" stroke="oklch(0.95 0.012 240)" stroke-width="1"></line>
@@ -292,7 +291,6 @@
           <div style="font-size: 14.5px; font-weight: 600; margin-bottom: 2px">Schlafphasen</div>
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px">
             <span style="font-size: 11.5px; color: oklch(0.7 0.02 245)">Letzte Nacht · 7 h 24 min</span>
-            <button onClick="{{ goAssistant }}" style="{{ jumpStyle }}" style-hover="border-color: oklch(0.86 0.05 240); background: oklch(0.98 0.014 240)">Tipps holen ›</button>
           </div>
           <div style="display: flex; flex-direction: column; gap: 13px">
             <sc-for list="{{ sleep }}" as="s" hint-placeholder-count="4">
@@ -559,6 +557,16 @@
       </aside>
     </div>
     </sc-if>
+
+    <sc-if value="{{ showPlaceholder }}" hint-placeholder-val="{{ false }}">
+    <div style="padding: 26px 40px 48px; max-width: 1180px; width: 100%">
+      <div style="max-width: 440px; margin: 48px auto 0; text-align: center; padding: 40px 36px; border: 1px solid oklch(0.93 0.016 240); border-radius: 16px; background: #fff">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.7 0.02 245); margin-bottom: 12px">In Arbeit</div>
+        <div style="font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 10px">{{ placeholder.title }}</div>
+        <div style="font-size: 13.5px; line-height: 1.6; color: oklch(0.52 0.02 245)">{{ placeholder.text }}</div>
+      </div>
+    </div>
+    </sc-if>
   </main>
 </div>
 
@@ -568,8 +576,7 @@ const ICONS = {
   home: 'M2 7.2 9 2l7 5.2V15a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z',
   activity: 'M1.5 9h3.2l2-4.6 2.6 9L11.4 9h3.1',
   plan: 'M3 3.5h12v11H3zM3 7h12M7 3.5v11',
-  journal: 'M4 2.5h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1zM6 6h5M6 9h5M6 12h3',
-  assistant: 'M9 2.2 10.4 6l3.8 1.4-3.8 1.4L9 12.6 7.6 8.8 3.8 7.4 7.6 6zM14 11.6l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z'
+  journal: 'M4 2.5h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1zM6 6h5M6 9h5M6 12h3'
 };
 
 const MOOD_LABEL = { 1: 'Sehr schlecht', 2: 'Schlecht', 3: 'Okay', 4: 'Gut', 5: 'Sehr gut' };
@@ -592,6 +599,21 @@ const MONTHS_LONG = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli
 /* Geometry of the 14-day mood spine: days run top (oldest) to bottom (today),
    mood maps left (low) to right (high) — a river read downwards, not a chart. */
 const SPINE = { top: 30, step: 20, xLow: 62, xHigh: 222, days: 14 };
+
+const PLACEHOLDERS = {
+  activity: {
+    title: 'Aktivität ist noch nicht angebunden',
+    text: 'Schritte, Puls, Schlaf und Trainingseinheiten sollen hier aus deinem Fitness-Tracker erscheinen, sobald die Anbindung steht. Bis dahin zeigen wir hier nichts, statt Zahlen zu erfinden.'
+  },
+  settings: {
+    title: 'Einstellungen sind noch nicht verfügbar',
+    text: 'Konto-, Benachrichtigungs- und Datenschutzeinstellungen entstehen hier, sobald sie gebraucht werden.'
+  },
+  profile: {
+    title: 'Dein Profil ist noch nicht verfügbar',
+    text: 'Name, Sportart und Ziele sollen hier hinterlegt werden können. Der Bereich ist noch nicht gebaut.'
+  }
+};
 
 const SAVE_SHORTCUT_HINT =
   /Mac/i.test(navigator.platform || navigator.userAgent) ? '⌘ + ↵' : 'Strg + ↵';
@@ -1099,8 +1121,7 @@ class Component extends DCLogic {
       { id: 'home', label: 'Übersicht', icon: 'home' },
       { id: 'activity', label: 'Aktivität', icon: 'activity' },
       { id: 'calendar', label: 'Kalender', icon: 'plan' },
-      { id: 'journal', label: 'Journal', icon: 'journal' },
-      { id: 'assistant', label: 'KI-Assistent', icon: 'assistant' }
+      { id: 'journal', label: 'Journal', icon: 'journal' }
     ];
     const all = items.concat([{ id: 'settings', label: 'Einstellungen' }, { id: 'profile', label: 'Lena Maurer' }]);
     const activeItem = all.find(i => i.id === this.state.active);
@@ -1148,7 +1169,6 @@ class Component extends DCLogic {
       },
       goActivity: () => this.setState({ active: 'activity' }),
       goCalendar: () => this.setState({ active: 'calendar', calView: 'Woche', offset: 0 }),
-      goAssistant: () => this.setState({ active: 'assistant' }),
       toggleRotate: open ? 'rotate(180deg)' : 'rotate(0deg)',
       podStyle: {
         background: this.state.active === 'profile' ? 'oklch(0.945 0.035 240)' : 'oklch(0.965 0.018 240)',
@@ -1171,10 +1191,12 @@ class Component extends DCLogic {
 
       ...this.calendarVals(),
       ...this.mentalHealthVals(),
-      showDashboard: this.state.active !== 'calendar' && this.state.active !== 'journal',
+      showDashboard: this.state.active === 'home',
       showCalendar: this.state.active === 'calendar',
       showJournal: this.state.active === 'journal',
-      showTabs: this.state.active !== 'journal',
+      showPlaceholder: PLACEHOLDERS[this.state.active] !== undefined,
+      placeholder: PLACEHOLDERS[this.state.active] || PLACEHOLDERS.activity,
+      showTabs: this.state.active === 'home' || this.state.active === 'calendar',
       tabs: this.state.active === 'calendar'
         ? ['Monat', 'Woche', 'Tag'].map(label => ({
             label, select: () => this.setState({ calView: label, offset: 0 }),
