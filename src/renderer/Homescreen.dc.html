@@ -79,7 +79,7 @@
     </div>
 
     <nav style="display: flex; flex-direction: column; gap: 3px">
-      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="4">
         <button onClick="{{ item.select }}" style="{{ item.style }}" style-hover="background: oklch(0.945 0.022 240)">
           <span style="width: 18px; height: 18px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center">{{ item.icon }}</span>
           <span style="white-space: nowrap; overflow: hidden; opacity: {{ labelOpacity }}; transition: opacity 160ms">{{ item.label }}</span>
@@ -603,7 +603,7 @@ const SPINE = { top: 30, step: 20, xLow: 62, xHigh: 222, days: 14 };
 const PLACEHOLDERS = {
   activity: {
     title: 'Aktivität ist noch nicht angebunden',
-    text: 'Schritte, Puls, Schlaf und Trainingseinheiten sollen hier aus deinem Fitness-Tracker erscheinen, sobald die Anbindung steht. Bis dahin zeigen wir hier nichts, statt Zahlen zu erfinden.'
+    text: 'Schritte, Puls, Schlaf und Trainingseinheiten erscheinen hier, sobald dein Fitness-Tracker angebunden ist. Die Zahlen auf der Übersicht sind bis dahin Beispieldaten.'
   },
   settings: {
     title: 'Einstellungen sind noch nicht verfügbar',
@@ -1195,7 +1195,7 @@ class Component extends DCLogic {
       showCalendar: this.state.active === 'calendar',
       showJournal: this.state.active === 'journal',
       showPlaceholder: PLACEHOLDERS[this.state.active] !== undefined,
-      placeholder: PLACEHOLDERS[this.state.active] || PLACEHOLDERS.activity,
+      placeholder: PLACEHOLDERS[this.state.active],
       showTabs: this.state.active === 'home' || this.state.active === 'calendar',
       tabs: this.state.active === 'calendar'
         ? ['Monat', 'Woche', 'Tag'].map(label => ({
